@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "R8.TimeMachine", "R8.TimeMachine\R8.TimeMachine.csproj", "{7E577A05-DC53-4FFC-9682-3D8BF4F1B366}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "R8.TimeMachine.Tests", "R8.TimeMachine.Tests\R8.TimeMachine.Tests.csproj", "{DE5B12E7-0A0D-4C28-AA7C-1148E2638CCB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "R8.TimeMachine.Testing", "R8.TimeMachine.Testing\R8.TimeMachine.Testing.csproj", "{60308B64-AD40-4D64-A812-8EFF4B25BDE2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7E577A05-DC53-4FFC-9682-3D8BF4F1B366}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E577A05-DC53-4FFC-9682-3D8BF4F1B366}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E577A05-DC53-4FFC-9682-3D8BF4F1B366}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E577A05-DC53-4FFC-9682-3D8BF4F1B366}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE5B12E7-0A0D-4C28-AA7C-1148E2638CCB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE5B12E7-0A0D-4C28-AA7C-1148E2638CCB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE5B12E7-0A0D-4C28-AA7C-1148E2638CCB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE5B12E7-0A0D-4C28-AA7C-1148E2638CCB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{60308B64-AD40-4D64-A812-8EFF4B25BDE2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60308B64-AD40-4D64-A812-8EFF4B25BDE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60308B64-AD40-4D64-A812-8EFF4B25BDE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60308B64-AD40-4D64-A812-8EFF4B25BDE2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
