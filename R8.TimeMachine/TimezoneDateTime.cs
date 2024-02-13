@@ -9,52 +9,84 @@ namespace R8.TimeMachine
     /// </summary>
     public readonly struct TimezoneDateTime : IComparable, IComparable<TimezoneDateTime>, IEquatable<TimezoneDateTime>, IFormattable
     {
-        private readonly ZonedDateTime _zonedDateTime;
+        private readonly ReadOnlyMemory<char> _timezone;
 
-        private TimezoneDateTime(DateTime dateTime, LocalTimezone timezone)
+        /// <summary>
+        ///     Represents an instant in time, typically expressed as a date and time of day according to a particular calendar and time zone.
+        /// </summary>
+        /// <param name="dateTime">A <see cref="DateTime" /> object.</param>
+        /// <param name="timezone">A <see cref="LocalTimezone" /> object.</param>
+        public TimezoneDateTime(DateTime dateTime, LocalTimezone timezone)
         {
-            _zonedDateTime = timezone.GetZonedDateTime(dateTime);
+            _timezone = timezone.IanaId.AsMemory();
+            var zonedDateTime = timezone.GetZonedDateTime(dateTime);
 
             Ticks = dateTime.Ticks;
-            Year = _zonedDateTime.Year;
-            Month = _zonedDateTime.Month;
-            Day = _zonedDateTime.Day;
-            Hour = _zonedDateTime.Hour;
-            Minute = _zonedDateTime.Minute;
-            Second = _zonedDateTime.Second;
-            DayOfWeek = _zonedDateTime.DayOfWeek.ToDayOfWeek();
+            Year = zonedDateTime.Year;
+            Month = zonedDateTime.Month;
+            Day = zonedDateTime.Day;
+            Hour = zonedDateTime.Hour;
+            Minute = zonedDateTime.Minute;
+            Second = zonedDateTime.Second;
+            DayOfWeek = zonedDateTime.DayOfWeek.ToDayOfWeek();
         }
 
+        /// <summary>
+        ///     Represents an instant in time, typically expressed as a date and time of day according to a particular calendar and time zone.
+        /// </summary>
+        /// <param name="zonedDateTime">A <see cref="ZonedDateTime" /> object.</param>
         private TimezoneDateTime(ZonedDateTime zonedDateTime)
         {
-            _zonedDateTime = zonedDateTime;
+            _timezone = zonedDateTime.Zone.Id.AsMemory();
 
-            var f = _zonedDateTime.ToDateTimeUtc();
-            Ticks = f.Ticks;
-            Year = _zonedDateTime.Year;
-            Month = _zonedDateTime.Month;
-            Day = _zonedDateTime.Day;
-            Hour = _zonedDateTime.Hour;
-            Minute = _zonedDateTime.Minute;
-            Second = _zonedDateTime.Second;
-            DayOfWeek = _zonedDateTime.DayOfWeek.ToDayOfWeek();
+            Ticks = zonedDateTime.ToDateTimeUtc().Ticks;
+            Year = zonedDateTime.Year;
+            Month = zonedDateTime.Month;
+            Day = zonedDateTime.Day;
+            Hour = zonedDateTime.Hour;
+            Minute = zonedDateTime.Minute;
+            Second = zonedDateTime.Second;
+            DayOfWeek = zonedDateTime.DayOfWeek.ToDayOfWeek();
         }
 
-        private TimezoneDateTime(int localYear, int localMonth, int localDay, int localHour, int localMinute, int localSecond, LocalTimezone timezone)
+        /// <summary>
+        ///     Represents an instant in time, typically expressed as a date and time of day according to a particular calendar and time zone.
+        /// </summary>
+        /// <param name="localYear">The year (1 through 9999).</param>
+        /// <param name="localMonth">The month (1 through 12).</param>
+        /// <param name="localDay">The day (1 through the number of days in <paramref name="localMonth" />).</param>
+        /// <param name="localHour">The hour (0 through 23).</param>
+        /// <param name="localMinute">The minute (0 through 59).</param>
+        /// <param name="localSecond">The second (0 through 59).</param>
+        /// <param name="timezone">A <see cref="LocalTimezone" /> object.</param>
+        public TimezoneDateTime(int localYear, int localMonth, int localDay, int localHour, int localMinute, int localSecond, LocalTimezone timezone)
         {
+            _timezone = timezone.IanaId.AsMemory();
+
             var dateTime = new LocalDateTime(localYear, localMonth, localDay, localHour, localMinute, localSecond, timezone.Calendar);
             var zone = dateTime.InZoneLeniently(timezone.Zone);
-            _zonedDateTime = zone.WithCalendar(timezone.Calendar);
+            var zonedDateTime = zone.WithCalendar(timezone.Calendar);
 
-            var f = _zonedDateTime.ToDateTimeUtc();
-            Ticks = f.Ticks;
+            Ticks = zonedDateTime.ToDateTimeUtc().Ticks;
             Year = localYear;
             Month = localMonth;
             Day = localDay;
             Hour = localHour;
             Minute = localMinute;
             Second = localSecond;
-            DayOfWeek = _zonedDateTime.DayOfWeek.ToDayOfWeek();
+            DayOfWeek = zonedDateTime.DayOfWeek.ToDayOfWeek();
+        }
+
+        /// <summary>
+        ///     Represents an instant in time, typically expressed as a date and time of day according to a particular calendar and time zone.
+        /// </summary>
+        /// <param name="localYear">The year (1 through 9999).</param>
+        /// <param name="localMonth">The month (1 through 12).</param>
+        /// <param name="localDay">The day (1 through the number of days in <paramref name="localMonth" />).</param>
+        /// <param name="timezone">A <see cref="LocalTimezone" /> object.</param>
+        public TimezoneDateTime(int localYear, int localMonth, int localDay, LocalTimezone timezone)
+            : this(localYear, localMonth, localDay, 0, 0, 0, timezone)
+        {
         }
 
         /// <inheritdoc cref="DateTime.Ticks" />
@@ -81,33 +113,6 @@ namespace R8.TimeMachine
         /// <inheritdoc cref="DateTime.DayOfWeek" />
         public DayOfWeek DayOfWeek { get; }
 
-        /// <summary>
-        ///     Returns a new <see cref="TimezoneDateTime" /> instance with given local year, month, day, hour, minute, second and timezone.
-        /// </summary>
-        /// <exception cref="ArgumentNullException">When <paramref name="timeZone" /> is null.</exception>
-        public static TimezoneDateTime Parse(int localYear, int localMonth, int localDay, int localHour, int localMinute, int localSecond, LocalTimezone timeZone)
-        {
-            return new TimezoneDateTime(localYear, localMonth, localDay, localHour, localMinute, localSecond, timeZone);
-        }
-
-        /// <summary>
-        ///     Returns a new <see cref="TimezoneDateTime" /> instance with given local year, month, day and timezone.
-        /// </summary>
-        /// <exception cref="ArgumentNullException">When <paramref name="timeZone" /> is null.</exception>
-        public static TimezoneDateTime Parse(int localYear, int localMonth, int localDay, LocalTimezone timeZone)
-        {
-            return new TimezoneDateTime(localYear, localMonth, localDay, 0, 0, 0, timeZone);
-        }
-
-        /// <summary>
-        ///     Returns a new <see cref="TimezoneDateTime" /> instance from given <see cref="DateTime" /> and <see cref="LocalTimezone" />.
-        /// </summary>
-        /// <exception cref="ArgumentNullException">When <paramref name="timezone" /> is null.</exception>
-        public static TimezoneDateTime FromDateTime(DateTime dateTime, LocalTimezone timezone)
-        {
-            return new TimezoneDateTime(dateTime, timezone);
-        }
-
         /// <inheritdoc cref="ZonedDateTime.ToDateTimeUtc" />
         public DateTime ToDateTimeUtc()
         {
@@ -121,7 +126,7 @@ namespace R8.TimeMachine
         /// <exception cref="InvalidOperationException">Thrown when timezone is not available.</exception>
         public LocalTimezone GetTimezone()
         {
-            return LocalTimezone.CreateFrom(_zonedDateTime.Zone.Id);
+            return LocalTimezone.Create(_timezone.Span.ToString());
         }
 
         /// <summary>
@@ -130,7 +135,7 @@ namespace R8.TimeMachine
         /// <returns>An integer from 28 through 31.</returns>
         public int GetDaysInMonth()
         {
-            return _zonedDateTime.Calendar.GetDaysInMonth(Year, Month);
+            return GetTimezone().Calendar.GetDaysInMonth(Year, Month);
         }
 
         /// <summary>
@@ -217,15 +222,18 @@ namespace R8.TimeMachine
         /// <returns>A <see cref="TimezoneDateTime" /> object</returns>
         public TimezoneDateTime GetStartOfWeek()
         {
-            var zonedDateTime = GetInitialMomentOfWeek();
-            return new TimezoneDateTime(zonedDateTime);
+            return new TimezoneDateTime(GetInitialMomentOfWeek());
         }
 
         private ZonedDateTime GetInitialMomentOfWeek()
         {
-            var dayInWeek = GetDayInWeek();
-            var zone = GetTimezone();
-            var zonedDateTime = _zonedDateTime.Plus(TimeSpan.FromDays(-dayInWeek).ToDuration()).Date.AtStartOfDayInZone(zone.Zone);
+            var timezone = GetTimezone();
+            var zonedDateTime = new LocalDateTime(Year, Month, Day, Hour, Minute, Second, timezone.Calendar)
+                .InZoneLeniently(timezone.Zone)
+                .WithCalendar(timezone.Calendar)
+                .Plus(TimeSpan.FromDays(-GetDayInWeek()).ToDuration())
+                .Date
+                .AtStartOfDayInZone(timezone.Zone);
             return zonedDateTime;
         }
 
@@ -247,7 +255,9 @@ namespace R8.TimeMachine
         public TimezoneDateTime AddYears(int value)
         {
             var timezone = GetTimezone();
-            var zonedDateTime = _zonedDateTime
+            var zonedDateTime = new LocalDateTime(Year, Month, Day, Hour, Minute, Second, timezone.Calendar)
+                .InZoneLeniently(timezone.Zone)
+                .WithCalendar(timezone.Calendar)
                 .LocalDateTime
                 .PlusYears(value)
                 .InZoneLeniently(timezone.Zone)
@@ -262,7 +272,9 @@ namespace R8.TimeMachine
         public TimezoneDateTime AddMonths(int value)
         {
             var timezone = GetTimezone();
-            var zonedDateTime = _zonedDateTime
+            var zonedDateTime = new LocalDateTime(Year, Month, Day, Hour, Minute, Second, timezone.Calendar)
+                .InZoneLeniently(timezone.Zone)
+                .WithCalendar(timezone.Calendar)
                 .LocalDateTime
                 .PlusMonths(value)
                 .InZoneLeniently(timezone.Zone)
@@ -276,7 +288,11 @@ namespace R8.TimeMachine
         /// <param name="value">A number of days. The value parameter can be negative or positive.</param>
         public TimezoneDateTime AddDays(int value)
         {
-            var zonedDateTime = _zonedDateTime.Plus(TimeSpan.FromDays(value).ToDuration());
+            var timezone = GetTimezone();
+            var zonedDateTime = new LocalDateTime(Year, Month, Day, Hour, Minute, Second, timezone.Calendar)
+                .InZoneLeniently(timezone.Zone)
+                .WithCalendar(timezone.Calendar)
+                .Plus(TimeSpan.FromDays(value).ToDuration());
             return new TimezoneDateTime(zonedDateTime);
         }
 
@@ -286,7 +302,11 @@ namespace R8.TimeMachine
         /// <param name="value">A number of hours. The value parameter can be negative or positive.</param>
         public TimezoneDateTime AddHours(int value)
         {
-            var zonedDateTime = _zonedDateTime.Plus(TimeSpan.FromHours(value).ToDuration());
+            var timezone = GetTimezone();
+            var zonedDateTime = new LocalDateTime(Year, Month, Day, Hour, Minute, Second, timezone.Calendar)
+                .InZoneLeniently(timezone.Zone)
+                .WithCalendar(timezone.Calendar)
+                .Plus(TimeSpan.FromHours(value).ToDuration());
             return new TimezoneDateTime(zonedDateTime);
         }
 
@@ -296,7 +316,11 @@ namespace R8.TimeMachine
         /// <param name="value">A number of minutes. The value parameter can be negative or positive.</param>
         public TimezoneDateTime AddMinutes(int value)
         {
-            var zonedDateTime = _zonedDateTime.Plus(TimeSpan.FromMinutes(value).ToDuration());
+            var timezone = GetTimezone();
+            var zonedDateTime = new LocalDateTime(Year, Month, Day, Hour, Minute, Second, timezone.Calendar)
+                .InZoneLeniently(timezone.Zone)
+                .WithCalendar(timezone.Calendar)
+                .Plus(TimeSpan.FromMinutes(value).ToDuration());
             return new TimezoneDateTime(zonedDateTime);
         }
 
@@ -306,7 +330,11 @@ namespace R8.TimeMachine
         /// <param name="value">A number of seconds. The value parameter can be negative or positive.</param>
         public TimezoneDateTime AddSeconds(int value)
         {
-            var zonedDateTime = _zonedDateTime.Plus(TimeSpan.FromSeconds(value).ToDuration());
+            var timezone = GetTimezone();
+            var zonedDateTime = new LocalDateTime(Year, Month, Day, Hour, Minute, Second, timezone.Calendar)
+                .InZoneLeniently(timezone.Zone)
+                .WithCalendar(timezone.Calendar)
+                .Plus(TimeSpan.FromSeconds(value).ToDuration());
             return new TimezoneDateTime(zonedDateTime);
         }
 
@@ -317,8 +345,7 @@ namespace R8.TimeMachine
         /// <returns>A <see cref="TimezoneDateTime" /> object</returns>
         public TimezoneDateTime WithTimezone(LocalTimezone timezone)
         {
-            var dateTime = _zonedDateTime.ToDateTimeUtc();
-            return new TimezoneDateTime(dateTime, timezone);
+            return new TimezoneDateTime(new DateTime(Ticks, DateTimeKind.Utc), timezone);
         }
 
         public override string ToString()
@@ -331,7 +358,11 @@ namespace R8.TimeMachine
             if (string.IsNullOrEmpty(format))
                 format = "G";
 
-            var dateTime = _zonedDateTime.ToDateTimeUnspecified();
+            var timezone = GetTimezone();
+            var dateTime = new LocalDateTime(Year, Month, Day, Hour, Minute, Second, timezone.Calendar)
+                .InZoneLeniently(timezone.Zone)
+                .WithCalendar(timezone.Calendar)
+                .ToDateTimeUnspecified();
             return dateTime.ToString(format, GetTimezone().Culture);
         }
 
@@ -378,14 +409,22 @@ namespace R8.TimeMachine
 
         public TimezoneDateTime Add(TimeSpan timeSpan)
         {
-            var zoned = _zonedDateTime.Plus(timeSpan.ToDuration());
-            return new TimezoneDateTime(zoned);
+            var timezone = GetTimezone();
+            var zonedDateTime = new LocalDateTime(Year, Month, Day, Hour, Minute, Second, timezone.Calendar)
+                .InZoneLeniently(timezone.Zone)
+                .WithCalendar(timezone.Calendar)
+                .Plus(timeSpan.ToDuration());
+            return new TimezoneDateTime(zonedDateTime);
         }
 
         public TimezoneDateTime Subtract(TimeSpan timeSpan)
         {
-            var zoned = _zonedDateTime.Minus(timeSpan.ToDuration());
-            return new TimezoneDateTime(zoned);
+            var timezone = GetTimezone();
+            var zonedDateTime = new LocalDateTime(Year, Month, Day, Hour, Minute, Second, timezone.Calendar)
+                .InZoneLeniently(timezone.Zone)
+                .WithCalendar(timezone.Calendar)
+                .Minus(timeSpan.ToDuration());
+            return new TimezoneDateTime(zonedDateTime);
         }
 
         public TimeSpan Subtract(TimezoneDateTime timezoneDateTime)

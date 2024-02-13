@@ -5,16 +5,18 @@ using System.Collections.Generic;
 namespace R8.TimeMachine
 {
     /// <summary>
-    ///     A collection of <see cref="ILocalTimezoneResolver" />.
+    ///     A collection of <see cref="ITimezone" />.
     /// </summary>
-    public class LocalTimezoneResolverCollection : IEnumerable<ILocalTimezoneResolver>
+    public class LocalTimezoneMapCollection : IEnumerable<LocalTimezoneMap>
     {
-        private readonly Dictionary<string, ILocalTimezoneResolver> _dictionary = new Dictionary<string, ILocalTimezoneResolver>();
+        private readonly Dictionary<string, LocalTimezoneMap> _dictionary = new Dictionary<string, LocalTimezoneMap>();
 
         private readonly object _syncRoot = new object();
 
-        internal LocalTimezoneResolverCollection()
+        internal LocalTimezoneMapCollection()
         {
+            if (!_dictionary.ContainsKey("UTC"))
+                this.Add(new UtcTimezone());
         }
 
         /// <summary>Gets or sets the element with the specified key.</summary>
@@ -23,8 +25,8 @@ namespace R8.TimeMachine
         ///     <paramref name="ianaId" /> is <see langword="null" />.
         /// </exception>
         /// <exception cref="KeyNotFoundException">The property is retrieved and <paramref name="ianaId" /> is not found.</exception>
-        /// <returns>A <see cref="ILocalTimezoneResolver" /> object.</returns>
-        public ILocalTimezoneResolver this[string ianaId]
+        /// <returns>A <see cref="ITimezone" /> object.</returns>
+        public LocalTimezoneMap this[string ianaId]
         {
             get
             {
@@ -37,7 +39,7 @@ namespace R8.TimeMachine
             }
         }
 
-        public IEnumerator<ILocalTimezoneResolver> GetEnumerator()
+        public IEnumerator<LocalTimezoneMap?> GetEnumerator()
         {
             lock (_syncRoot)
             {
@@ -53,20 +55,27 @@ namespace R8.TimeMachine
         /// <summary>
         ///     Add the specified resolver to the collection.
         /// </summary>
-        /// <typeparam name="T">A class that implements <see cref="ILocalTimezoneResolver" />.</typeparam>
-        public void Add<T>(T resolver) where T : class, ILocalTimezoneResolver
+        /// <param name="value">A resolver that implements <see cref="ITimezone" />.</param>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="value" /> is <see langword="null" />.</exception>
+        /// <typeparam name="T">Any type that implements <see cref="ITimezone" />.</typeparam>
+        public void Add<T>(T value) where T : LocalTimezoneMap
         {
+            if (value == null)
+                throw new ArgumentNullException(nameof(value));
+
             lock (_syncRoot)
             {
-                _dictionary[resolver.IanaId] = resolver;
+                _dictionary[value.IanaId] = value;
             }
         }
 
         /// <summary>
-        ///     Removes the resolver with the specified id from the <see cref="LocalTimezoneResolverCollection" />
+        ///     Removes the resolver with the specified id from the <see cref="LocalTimezoneMapCollection" />
         /// </summary>
         public void Remove(string ianaId)
         {
+            if (ianaId == null)
+                throw new ArgumentNullException(nameof(ianaId));
             lock (_syncRoot)
             {
                 _dictionary.Remove(ianaId);
@@ -74,7 +83,7 @@ namespace R8.TimeMachine
         }
 
         /// <summary>
-        ///     Removes all timezone resolvers from the <see cref="LocalTimezoneResolverCollection" />.
+        ///     Removes all timezone resolvers from the <see cref="LocalTimezoneMapCollection" />.
         /// </summary>
         public void Clear()
         {
@@ -85,7 +94,7 @@ namespace R8.TimeMachine
         }
 
         /// <inheritdoc cref="IDictionary{TKey,TValue}.TryGetValue" />
-        public bool TryGetValue(string key, out ILocalTimezoneResolver value)
+        public bool TryGetValue(string key, out LocalTimezoneMap? value)
         {
             lock (_syncRoot)
             {

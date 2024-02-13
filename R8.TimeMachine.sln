@@ -6,6 +6,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "R8.TimeMachine.Tests", "R8.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "R8.TimeMachine.Testing", "R8.TimeMachine.Testing\R8.TimeMachine.Testing.csproj", "{60308B64-AD40-4D64-A812-8EFF4B25BDE2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "R8.TimeMachine.AspNetCore", "R8.TimeMachine.AspNetCore\R8.TimeMachine.AspNetCore.csproj", "{B8FA77CC-0EB0-40D5-8C22-1F9271A7807A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "R8.TimeMachine.AspNetCore.Tests", "R8.TimeMachine.AspNetCore.Tests\R8.TimeMachine.AspNetCore.Tests.csproj", "{6A1C3B77-6B1B-4064-BAF1-C8FD9CA6015F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "R8.TimeMachine.AspNetCore.Sample", "R8.TimeMachine.AspNetCore.Sample\R8.TimeMachine.AspNetCore.Sample.csproj", "{77357491-F646-4189-AD21-7B1E1C7F8160}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +30,17 @@ Global
 		{60308B64-AD40-4D64-A812-8EFF4B25BDE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{60308B64-AD40-4D64-A812-8EFF4B25BDE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{60308B64-AD40-4D64-A812-8EFF4B25BDE2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8FA77CC-0EB0-40D5-8C22-1F9271A7807A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8FA77CC-0EB0-40D5-8C22-1F9271A7807A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8FA77CC-0EB0-40D5-8C22-1F9271A7807A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8FA77CC-0EB0-40D5-8C22-1F9271A7807A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6A1C3B77-6B1B-4064-BAF1-C8FD9CA6015F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A1C3B77-6B1B-4064-BAF1-C8FD9CA6015F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6A1C3B77-6B1B-4064-BAF1-C8FD9CA6015F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6A1C3B77-6B1B-4064-BAF1-C8FD9CA6015F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77357491-F646-4189-AD21-7B1E1C7F8160}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77357491-F646-4189-AD21-7B1E1C7F8160}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77357491-F646-4189-AD21-7B1E1C7F8160}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77357491-F646-4189-AD21-7B1E1C7F8160}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

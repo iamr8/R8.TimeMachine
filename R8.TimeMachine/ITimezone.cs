@@ -1,9 +1,10 @@
+using System;
 using System.Globalization;
 using NodaTime;
 
 namespace R8.TimeMachine
 {
-    public interface ILocalTimezoneResolver
+    public interface ITimezone
     {
         /// <summary>
         ///     Gets the IANA timezone identifier.
@@ -11,15 +12,18 @@ namespace R8.TimeMachine
         string IanaId { get; }
 
         /// <summary>
+        ///     Gets the first day of the week.
+        /// </summary>
+        DayOfWeek FirstDayOfWeek { get; }
+
+        /// <summary>
         ///     Returns the calendar system of the timezone.
         /// </summary>
-        /// <returns></returns>
-        CalendarSystem GetCalendarSystem();
+        CalendarSystem Calendar { get; }
 
         /// <summary>
         ///     Returns the culture info of the timezone.
         /// </summary>
-        /// <returns></returns>
-        CultureInfo GetCultureInfo();
+        CultureInfo Culture { get; }
     }
 }

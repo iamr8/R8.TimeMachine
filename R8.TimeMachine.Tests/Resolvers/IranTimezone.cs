@@ -1,20 +1,14 @@
+using System;
 using System.Globalization;
 using NodaTime;
 
 namespace R8.TimeMachine.Tests.Resolvers
 {
-    public class IranTimezone : ILocalTimezoneResolver
+    public class IranTimezone : LocalTimezoneMap
     {
-        public string IanaId => "Asia/Tehran";
-
-        public CalendarSystem GetCalendarSystem()
-        {
-            return CalendarSystem.PersianSimple;
-        }
-
-        public CultureInfo GetCultureInfo()
-        {
-            return CultureInfo.GetCultureInfo("fa-IR");
-        }
+        public override string IanaId => "Asia/Tehran";
+        public override DayOfWeek FirstDayOfWeek => DayOfWeek.Saturday;
+        public override CalendarSystem Calendar => CalendarSystem.PersianSimple;
+        public override CultureInfo Culture => CultureInfo.GetCultureInfo("fa-IR");
     }
 }

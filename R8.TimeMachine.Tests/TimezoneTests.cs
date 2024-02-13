@@ -11,33 +11,18 @@ namespace R8.TimeMachine.Tests
     {
         public TimezoneTests()
         {
-            LocalTimezone.Resolvers.Clear();
-            LocalTimezone.Resolvers.Add(new IranTimezone());
-            LocalTimezone.Resolvers.Add(new TurkeyTimezone());
-            LocalTimezone.Resolvers.Add(new UKTimezone());
-            LocalTimezone.Resolvers.Add(new LosAngelesTimezone());
-        }
-
-        [Fact]
-        public void should_return_current_timezone()
-        {
-            var timezone = LocalTimezone.Current;
-            var currentTimezone = DateTimeZoneProviders.Tzdb.GetSystemDefault();
-
-            timezone.IanaId.Should().Be(currentTimezone.Id);
-
-            LocalTimezone.Current = LocalTimezone.CreateFrom("Asia/Tehran");
-            var timezone2 = LocalTimezone.Current;
-
-            timezone2.IanaId.Should().Be("Asia/Tehran");
+            LocalTimezone.Mappings.Clear();
+            LocalTimezone.Mappings.Add(new IranTimezone());
+            LocalTimezone.Mappings.Add(new TurkeyTimezone());
+            LocalTimezone.Mappings.Add(new UKTimezone());
+            LocalTimezone.Mappings.Add(new LosAngelesTimezone());
         }
 
         [Fact]
         public void should_return_current_timezone_set_by_scope()
         {
-            LocalTimezone.Current = LocalTimezone.CreateFrom("Asia/Tehran");
-
-            LocalTimezone.Current.IanaId.Should().Be("Asia/Tehran");
+            var systemTimezone = DateTimeZoneProviders.Tzdb.GetSystemDefault();
+            LocalTimezone.Current.IanaId.Should().Be(systemTimezone.Id);
 
             LocalTimezone.StartScope("Europe/Istanbul");
 
@@ -45,7 +30,7 @@ namespace R8.TimeMachine.Tests
 
             LocalTimezone.EndScope();
 
-            LocalTimezone.Current.IanaId.Should().Be("Asia/Tehran");
+            LocalTimezone.Current.IanaId.Should().Be(systemTimezone.Id);
         }
 
         [Fact]
@@ -61,7 +46,7 @@ namespace R8.TimeMachine.Tests
         public void should_return_list_of_resolvers()
         {
             // Act
-            var resolvers = LocalTimezone.Resolvers;
+            var resolvers = LocalTimezone.Mappings;
 
             // Assert
             resolvers.Should().HaveCount(4);
@@ -75,9 +60,10 @@ namespace R8.TimeMachine.Tests
         public void should_return_timezone_from_resolver()
         {
             // Act
-            var timezone = LocalTimezone.Resolvers["Asia/Tehran"].GetLocalTimezone();
+            var timezone = LocalTimezone.Mappings["Asia/Tehran"].GetLocalTimezone();
 
             // Assert
+            timezone.Should().NotBeNull();
             timezone.IanaId.Should().Be("Asia/Tehran");
             timezone.Id.Should().BeOneOf("Iran Standard Time", "Iran Daylight Time");
             timezone.ToString().Should().Be("GMT+03:30");
@@ -85,7 +71,7 @@ namespace R8.TimeMachine.Tests
             timezone.Calendar.Should().Be(CalendarSystem.PersianSimple);
             timezone.FirstDayOfWeek.Should().Be(DayOfWeek.Saturday);
 
-            var daysOfWeek = timezone.GetDaysOfWeek();
+            var daysOfWeek = timezone.Map.OrderedDaysOfWeek;
             daysOfWeek[0].Should().Be(DayOfWeek.Saturday);
             daysOfWeek[1].Should().Be(DayOfWeek.Sunday);
             daysOfWeek[2].Should().Be(DayOfWeek.Monday);
@@ -99,7 +85,7 @@ namespace R8.TimeMachine.Tests
         public void should_return_timezone_of_iran()
         {
             // Act
-            var timezone = LocalTimezone.CreateFrom("Asia/Tehran");
+            var timezone = LocalTimezone.Create("Asia/Tehran");
 
             // Assert
             timezone.IanaId.Should().Be("Asia/Tehran");
@@ -109,7 +95,7 @@ namespace R8.TimeMachine.Tests
             timezone.Calendar.Should().Be(CalendarSystem.PersianSimple);
             timezone.FirstDayOfWeek.Should().Be(DayOfWeek.Saturday);
 
-            var daysOfWeek = timezone.GetDaysOfWeek();
+            var daysOfWeek = timezone.Map.OrderedDaysOfWeek;
             daysOfWeek[0].Should().Be(DayOfWeek.Saturday);
             daysOfWeek[1].Should().Be(DayOfWeek.Sunday);
             daysOfWeek[2].Should().Be(DayOfWeek.Monday);
@@ -123,7 +109,7 @@ namespace R8.TimeMachine.Tests
         public void should_return_timezone_of_turkey()
         {
             // Act
-            var timezone = LocalTimezone.CreateFrom("Europe/Istanbul");
+            var timezone = LocalTimezone.Create("Europe/Istanbul");
 
             // Assert
             timezone.IanaId.Should().Be("Europe/Istanbul");
@@ -133,7 +119,7 @@ namespace R8.TimeMachine.Tests
             timezone.Calendar.Should().Be(CalendarSystem.Gregorian);
             timezone.FirstDayOfWeek.Should().Be(DayOfWeek.Monday);
 
-            var daysOfWeek = timezone.GetDaysOfWeek();
+            var daysOfWeek = timezone.Map.OrderedDaysOfWeek;
             daysOfWeek[0].Should().Be(DayOfWeek.Monday);
             daysOfWeek[1].Should().Be(DayOfWeek.Tuesday);
             daysOfWeek[2].Should().Be(DayOfWeek.Wednesday);
@@ -147,7 +133,7 @@ namespace R8.TimeMachine.Tests
         public void should_return_timezone_of_los_angeles()
         {
             // Act
-            var timezone = LocalTimezone.CreateFrom("America/Los_Angeles");
+            var timezone = LocalTimezone.Create("America/Los_Angeles");
 
             // Assert
             timezone.IanaId.Should().Be("America/Los_Angeles");
@@ -157,7 +143,7 @@ namespace R8.TimeMachine.Tests
             timezone.Calendar.Should().Be(CalendarSystem.Gregorian);
             timezone.FirstDayOfWeek.Should().Be(DayOfWeek.Sunday);
 
-            var daysOfWeek = timezone.GetDaysOfWeek();
+            var daysOfWeek = timezone.Map.OrderedDaysOfWeek;
             daysOfWeek[0].Should().Be(DayOfWeek.Sunday);
             daysOfWeek[1].Should().Be(DayOfWeek.Monday);
             daysOfWeek[2].Should().Be(DayOfWeek.Tuesday);
@@ -171,7 +157,7 @@ namespace R8.TimeMachine.Tests
         public void should_return_timezone_of_uk()
         {
             // Act
-            var timezone = LocalTimezone.CreateFrom("Europe/London");
+            var timezone = LocalTimezone.Create("Europe/London");
 
             // Assert
             timezone.IanaId.Should().Be("Europe/London");
@@ -181,7 +167,7 @@ namespace R8.TimeMachine.Tests
             timezone.Calendar.Should().Be(CalendarSystem.Gregorian);
             timezone.FirstDayOfWeek.Should().Be(DayOfWeek.Monday);
 
-            var daysOfWeek = timezone.GetDaysOfWeek();
+            var daysOfWeek = timezone.Map.OrderedDaysOfWeek;
             daysOfWeek[0].Should().Be(DayOfWeek.Monday);
             daysOfWeek[1].Should().Be(DayOfWeek.Tuesday);
             daysOfWeek[2].Should().Be(DayOfWeek.Wednesday);
@@ -195,18 +181,17 @@ namespace R8.TimeMachine.Tests
         public void should_return_cached_timezone()
         {
             // Act
-            var timezone = LocalTimezone.CreateFrom("Asia/Tehran");
-            var timezone2 = LocalTimezone.CreateFrom("Asia/Tehran");
+            var timezone = LocalTimezone.Create("Asia/Tehran");
 
             // Assert
-            timezone2.IanaId.Should().Be("Asia/Tehran");
-            timezone2.Id.Should().BeOneOf("Iran Standard Time", "Iran Daylight Time");
-            timezone2.ToString().Should().Be("GMT+03:30");
-            timezone2.Culture.Should().Be(CultureInfo.GetCultureInfo("fa-IR"));
-            timezone2.Calendar.Should().Be(CalendarSystem.PersianSimple);
-            timezone2.FirstDayOfWeek.Should().Be(DayOfWeek.Saturday);
+            timezone.IanaId.Should().Be("Asia/Tehran");
+            timezone.Id.Should().BeOneOf("Iran Standard Time", "Iran Daylight Time");
+            timezone.ToString().Should().Be("GMT+03:30");
+            timezone.Culture.Should().Be(CultureInfo.GetCultureInfo("fa-IR"));
+            timezone.Calendar.Should().Be(CalendarSystem.PersianSimple);
+            timezone.FirstDayOfWeek.Should().Be(DayOfWeek.Saturday);
 
-            var daysOfWeek = timezone2.GetDaysOfWeek();
+            var daysOfWeek = timezone.Map.OrderedDaysOfWeek;
             daysOfWeek[0].Should().Be(DayOfWeek.Saturday);
             daysOfWeek[1].Should().Be(DayOfWeek.Sunday);
             daysOfWeek[2].Should().Be(DayOfWeek.Monday);
@@ -220,7 +205,7 @@ namespace R8.TimeMachine.Tests
         public void should_return_timezone_without_resolver()
         {
             // Act
-            var timezone = LocalTimezone.CreateFrom("Europe/Paris");
+            var timezone = LocalTimezone.Create("Europe/Paris");
 
             // Assert
             timezone.IanaId.Should().Be("Europe/Paris");
@@ -232,20 +217,10 @@ namespace R8.TimeMachine.Tests
         }
 
         [Fact]
-        public void should_not_recalculate_days_of_week()
-        {
-            var timezone = LocalTimezone.CreateFrom("Asia/Tehran");
-            var daysOfWeek = timezone.GetDaysOfWeek();
-            var daysOfWeek2 = timezone.GetDaysOfWeek();
-
-            daysOfWeek.Should().BeSameAs(daysOfWeek2);
-        }
-
-        [Fact]
         public void should_be_equal()
         {
-            var timezone = LocalTimezone.CreateFrom("Asia/Tehran");
-            var timezone2 = LocalTimezone.CreateFrom("Asia/Tehran");
+            var timezone = LocalTimezone.Create("Asia/Tehran");
+            var timezone2 = LocalTimezone.Create("Asia/Tehran");
 
             timezone.Should().Be(timezone2);
         }
@@ -253,8 +228,8 @@ namespace R8.TimeMachine.Tests
         [Fact]
         public void should_not_be_equal()
         {
-            var timezone = LocalTimezone.CreateFrom("Asia/Tehran");
-            var timezone2 = LocalTimezone.CreateFrom("Europe/Istanbul");
+            var timezone = LocalTimezone.Create("Asia/Tehran");
+            var timezone2 = LocalTimezone.Create("Europe/Istanbul");
 
             timezone.Should().NotBe(timezone2);
         }
@@ -262,16 +237,16 @@ namespace R8.TimeMachine.Tests
         [Fact]
         public void should_not_be_equal_with_null()
         {
-            var timezone = LocalTimezone.CreateFrom("Asia/Tehran");
+            var timezone = LocalTimezone.Create("Asia/Tehran");
 
-            timezone.Should().NotBe(null);
+            timezone.Should().NotBeNull();
         }
 
         [Fact]
         public void should_be_equal_by_operator()
         {
-            var timezone = LocalTimezone.CreateFrom("Asia/Tehran");
-            var timezone2 = LocalTimezone.CreateFrom("Asia/Tehran");
+            var timezone = LocalTimezone.Create("Asia/Tehran");
+            var timezone2 = LocalTimezone.Create("Asia/Tehran");
 
             (timezone == timezone2).Should().BeTrue();
         }
@@ -279,8 +254,8 @@ namespace R8.TimeMachine.Tests
         [Fact]
         public void should_not_be_equal_by_operator()
         {
-            var timezone = LocalTimezone.CreateFrom("Asia/Tehran");
-            var timezone2 = LocalTimezone.CreateFrom("Europe/Istanbul");
+            var timezone = LocalTimezone.Create("Asia/Tehran");
+            var timezone2 = LocalTimezone.Create("Europe/Istanbul");
 
             (timezone != timezone2).Should().BeTrue();
         }
@@ -288,7 +263,7 @@ namespace R8.TimeMachine.Tests
         [Fact]
         public void should_be_casted_to_string()
         {
-            var timezone = LocalTimezone.CreateFrom("Asia/Tehran");
+            var timezone = LocalTimezone.Create("Asia/Tehran");
             ((string)timezone).Should().Be("Asia/Tehran");
         }
 
@@ -302,7 +277,7 @@ namespace R8.TimeMachine.Tests
         [Fact]
         public void should_return_zoned_date_time_from_utc_datetime_according_to_timezone()
         {
-            var timezone = LocalTimezone.CreateFrom("Asia/Tehran");
+            var timezone = LocalTimezone.Create("Asia/Tehran");
             var dateTime = new DateTime(2021, 1, 1, 12, 0, 5, DateTimeKind.Utc);
             var zonedDateTime = timezone.GetZonedDateTime(dateTime);
 
@@ -317,7 +292,7 @@ namespace R8.TimeMachine.Tests
         [Fact]
         public void should_return_zoned_date_time_from_local_datetime_according_to_timezone()
         {
-            var timezone = LocalTimezone.CreateFrom("Asia/Tehran");
+            var timezone = LocalTimezone.Create("Asia/Tehran");
             var dateTime = new DateTime(2021, 1, 1, 12, 0, 0, DateTimeKind.Local);
             var zonedDateTime = timezone.GetZonedDateTime(dateTime);
 
@@ -332,8 +307,8 @@ namespace R8.TimeMachine.Tests
         [Fact]
         public void should_return_offset_from_timezone()
         {
-            var timezone = LocalTimezone.CreateFrom("Asia/Tehran");
-            var offset = timezone.GetOffset();
+            var timezone = LocalTimezone.Create("Asia/Tehran");
+            var offset = timezone.Offset;
 
             offset.Should().Be(Offset.FromHoursAndMinutes(3, 30));
         }
@@ -341,8 +316,8 @@ namespace R8.TimeMachine.Tests
         [Fact]
         public void should_be_comparable_greater_than()
         {
-            var timezone = LocalTimezone.CreateFrom("Asia/Tehran");
-            var timezone2 = LocalTimezone.CreateFrom("Europe/Istanbul");
+            var timezone = LocalTimezone.Create("Asia/Tehran");
+            var timezone2 = LocalTimezone.Create("Europe/Istanbul");
 
             (timezone > timezone2).Should().BeTrue();
         }
@@ -350,8 +325,8 @@ namespace R8.TimeMachine.Tests
         [Fact]
         public void should_be_comparable_greater_than_or_equal()
         {
-            var timezone = LocalTimezone.CreateFrom("Asia/Tehran");
-            var timezone2 = LocalTimezone.CreateFrom("Asia/Tehran");
+            var timezone = LocalTimezone.Create("Asia/Tehran");
+            var timezone2 = LocalTimezone.Create("Asia/Tehran");
 
             (timezone >= timezone2).Should().BeTrue();
         }
@@ -359,8 +334,8 @@ namespace R8.TimeMachine.Tests
         [Fact]
         public void should_be_comparable_less_than()
         {
-            var timezone = LocalTimezone.CreateFrom("Asia/Tehran");
-            var timezone2 = LocalTimezone.CreateFrom("Europe/Istanbul");
+            var timezone = LocalTimezone.Create("Asia/Tehran");
+            var timezone2 = LocalTimezone.Create("Europe/Istanbul");
 
             (timezone2 < timezone).Should().BeTrue();
         }
@@ -368,8 +343,8 @@ namespace R8.TimeMachine.Tests
         [Fact]
         public void should_be_comparable_less_than_or_equal()
         {
-            var timezone = LocalTimezone.CreateFrom("Asia/Tehran");
-            var timezone2 = LocalTimezone.CreateFrom("Asia/Tehran");
+            var timezone = LocalTimezone.Create("Asia/Tehran");
+            var timezone2 = LocalTimezone.Create("Asia/Tehran");
 
             (timezone2 <= timezone).Should().BeTrue();
         }
@@ -377,8 +352,8 @@ namespace R8.TimeMachine.Tests
         [Fact]
         public void should_be_comparable_hash_code()
         {
-            var timezone = LocalTimezone.CreateFrom("Asia/Tehran");
-            var timezone2 = LocalTimezone.CreateFrom("Asia/Tehran");
+            var timezone = LocalTimezone.Create("Asia/Tehran");
+            var timezone2 = LocalTimezone.Create("Asia/Tehran");
 
             timezone2.GetHashCode().Should().Be(timezone.GetHashCode());
         }

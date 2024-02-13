@@ -1,6 +1,6 @@
 namespace R8.TimeMachine
 {
-    internal class ControllableTimerFactory : IControllableTimerFactory
+    public class ControllableTimerFactory : IControllableTimerFactory
     {
         public IControllableTimer Create()
         {

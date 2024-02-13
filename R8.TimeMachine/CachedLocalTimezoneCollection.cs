@@ -49,7 +49,7 @@ namespace R8.TimeMachine
         }
 
         /// <inheritdoc cref="IDictionary{TKey,TValue}.TryGetValue" />
-        internal bool TryGetValue(string key, out LocalTimezone value)
+        internal bool TryGetValue(string key, out LocalTimezone? value)
         {
             lock (_syncRoot)
             {

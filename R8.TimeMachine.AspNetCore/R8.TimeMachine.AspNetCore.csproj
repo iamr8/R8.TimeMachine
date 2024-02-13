@@ -1,17 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netstandard2.1</TargetFramework>
+        <TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
         <Nullable>enable</Nullable>
         <EnableNETAnalyzers>true</EnableNETAnalyzers>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="NodaTime" Version="3.1.11" />
+        <FrameworkReference Include="Microsoft.AspNetCore.App"/>
     </ItemGroup>
 
     <ItemGroup>
-        <InternalsVisibleTo Include="$(AssemblyName).Tests"/>
+        <ProjectReference Include="..\R8.TimeMachine\R8.TimeMachine.csproj"/>
     </ItemGroup>
 
 </Project>
